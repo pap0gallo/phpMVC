@@ -28,14 +28,16 @@ $app->get('/', function ($request, $response) {
 // BEGIN (write your solution here)
 $app->get('/phones', function ($request, $response) use ($phones) {
     $json = json_encode($phones, JSON_PRETTY_PRINT);
-    $response->write($json);
-    return $response->withHeader('Content-Type', 'application/json');
+    return $response
+        ->withHeader('Content-Type', 'application/json')
+        ->write($json);
 });
 
 $app->get('/domains', function ($request, $response) use ($domains) {
     $json = json_encode($domains, JSON_PRETTY_PRINT);
-    $response->write($json);
-    return $response->withHeader('Content-Type', 'application/json');
+    return $response
+        ->withHeader('Content-Type', 'application/json')
+        ->write($json);
 });
 // END
 
