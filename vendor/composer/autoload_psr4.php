@@ -19,5 +19,6 @@ return array(
     'Invoker\\' => array($vendorDir . '/php-di/invoker/src'),
     'Fig\\Http\\Message\\' => array($vendorDir . '/fig/http-message-util/src'),
     'FastRoute\\' => array($vendorDir . '/nikic/fast-route/src'),
+    'Faker\\' => array($vendorDir . '/fakerphp/faker/src/Faker'),
     'DI\\' => array($vendorDir . '/php-di/php-di/src'),
 );

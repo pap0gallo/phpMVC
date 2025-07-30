@@ -9,6 +9,7 @@ class ComposerStaticInitd751713988987e9331980363e24189ce
     public static $files = array (
         '253c157292f75eb38082b5acb06f3f01' => __DIR__ . '/..' . '/nikic/fast-route/src/functions.php',
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
+        '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
         'b33e3d135e5d9e47d845c576147bda89' => __DIR__ . '/..' . '/php-di/php-di/src/functions.php',
     );
@@ -41,6 +42,7 @@ class ComposerStaticInitd751713988987e9331980363e24189ce
         array (
             'Fig\\Http\\Message\\' => 17,
             'FastRoute\\' => 10,
+            'Faker\\' => 6,
         ),
         'D' => 
         array (
@@ -102,6 +104,10 @@ class ComposerStaticInitd751713988987e9331980363e24189ce
         'FastRoute\\' => 
         array (
             0 => __DIR__ . '/..' . '/nikic/fast-route/src',
+        ),
+        'Faker\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/fakerphp/faker/src/Faker',
         ),
         'DI\\' => 
         array (

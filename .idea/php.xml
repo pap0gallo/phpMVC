@@ -30,6 +30,8 @@
       <path value="$PROJECT_DIR$/vendor/psr/http-factory" />
       <path value="$PROJECT_DIR$/vendor/php-di/invoker" />
       <path value="$PROJECT_DIR$/vendor/php-di/php-di" />
+      <path value="$PROJECT_DIR$/vendor/symfony/deprecation-contracts" />
+      <path value="$PROJECT_DIR$/vendor/fakerphp/faker" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.3" />
