@@ -29,7 +29,7 @@ $app->get('/users', function ($request, $response) use ($users) {
     return $this->get('renderer')->render($response, 'users/index.phtml', $params);
 });
 
-$app->get('/users/{id}', function ($request, $response, $args) use ($users){
+$app->get('/users/{id}', function ($request, $response, $args) use ($users) {
     $id = $args['id'];
     $collection = collect($users);
     $params['user'] = $collection->firstWhere('id', $id);

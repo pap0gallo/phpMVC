@@ -1,2 +1,2 @@
-<h1>id = <?= $id ?></h1>
-<h1>nickname = user-<?= $id ?></h1>
+<h1>id = <?= htmlspecialchars($id) ?></h1>
+<h1>nickname = user-<?= htmlspecialchars($id) ?></h1>
