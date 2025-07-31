@@ -1,8 +1,8 @@
 <?php
 
-namespace App\L10;
+namespace App\L09\src;
 
-require __DIR__ . '/../../vendor/autoload.php';
+require __DIR__ . '/../../../vendor/autoload.php';
 
 class Generator
 {

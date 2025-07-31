@@ -4,7 +4,7 @@ use Slim\Factory\AppFactory;
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-$companies = App\L09\Generator::generate(100);
+$companies = \App\L09\src\Generator::generate(100);
 
 $app = AppFactory::create();
 $app->addErrorMiddleware(true, true, true);
