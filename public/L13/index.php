@@ -5,13 +5,13 @@ use DI\Container;
 
 use function Symfony\Component\String\s;
 
-require '/composer/vendor/autoload.php';
+require __DIR__ . '/../../vendor/autoload.php';
 
-$users = App\Generator::generate(100);
+$users = App\L13\src\Generator::generate(100);
 
 $container = new Container();
 $container->set('renderer', function () {
-    return new \Slim\Views\PhpRenderer(__DIR__ . '/../templates');
+    return new \Slim\Views\PhpRenderer(__DIR__ . '/templates');
 });
 
 AppFactory::setContainer($container);
@@ -22,17 +22,18 @@ $app->get('/', function ($request, $response) {
     return $this->get('renderer')->render($response, 'index.phtml');
 });
 
-// BEGIN
+// BEGIN (write your solution here)
 $app->get('/users', function ($request, $response) use ($users) {
-    $term = $request->getQueryParam('term', '');
-    $result = collect($users)->filter(
-        fn($user) => empty($term) ? true : s($user['firstName'])->ignoreCase()->startsWith($term)
-    );
-    $params = [
-        'users' => $result,
-        'term' => $term
-    ];
-    return $this->get('renderer')->render($response, 'users/index.phtml', $params);
+    $term = $request->getQueryParam('term') ?? '';
+    $output = collect($users)->filter(
+        fn($user) => empty($term) || s($user['firstName'])
+                ->ignoreCase()
+                ->startsWith($term)
+    )->all();
+    $params = ['term' => $term, 'users' => $output];
+    return $this
+        ->get('renderer')
+        ->render($response, 'users/index.phtml', $params);
 });
 // END
 
