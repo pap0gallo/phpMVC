@@ -3,10 +3,16 @@
     <input type="submit" value="Search" />
 </form>
 <hr>
-<ul>
+<table>
     <?php foreach ($users as $user) : ?>
-        <li>
-            <i><?= $user ?></i>
-        </li>
+        <tr>
+            <td>
+                <?= $user['nickname'] ?>
+            </td>
+            <td>
+                <?= $user['email'] ?>
+            </td>
+        </tr>
     <?php endforeach ?>
-</ul>
+</table>
+<a href="/users/new">New User</a>

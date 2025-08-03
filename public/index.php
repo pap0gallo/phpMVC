@@ -8,6 +8,8 @@ use DI\Container;
 
 $users = ['mike', 'mishel', 'adel', 'keks', 'kamila'];
 
+$dir =
+
 $container = new Container();
 $container->set('renderer', function () {
     // Параметром передается базовая директория, в которой будут храниться шаблоны
@@ -23,11 +25,15 @@ $app->get('/', function ($request, $response) {
     // return $response->write('Welcome to Slim!');
 });
 
-$app->get('/users', function ($request, $response) use ($users) {
+$app->get('/users', function ($request, $response) {
+    $dir = __DIR__ . '/../files';
+    $path = $dir . '/users_dp';
+    $content = file_get_contents($path);
+    $users = json_decode($content, JSON_PRETTY_PRINT);
     $term = $request->getQueryParam('term') ?? '';
     if ($term) {
         $params['users'] = collect($users)
-            ->filter(fn($item) => str_contains($item, $term))
+            ->filter(fn($item) => str_contains($item['nickname'], $term))
             ->all();
     } else {
         $params['users'] = $users;
@@ -38,21 +44,50 @@ $app->get('/users', function ($request, $response) use ($users) {
         ->render($response, 'users/index.phtml', $params);
 });
 
-$app->post('/users', function ($request, $response) {
-    return $response->withStatus(302);
-});
+//$app->post('/users', function ($request, $response) {
+//    return $response->withStatus(302);
+//});
 
 $app->get('/courses/{id}', function ($request, $response, array $args) {
     $id = $args['id'];
     return $response->write("Course id: {$id}");
 });
 
-$app->get('/users/{id}', function ($request, $response, $args) {
-    $params = ['id' => $args['id'], 'nickname' => 'user-' . $args['id']];
-    // Указанный путь считается относительно базовой директории для шаблонов, заданной на этапе конфигурации
-    // $this доступен внутри анонимной функции благодаря https://php.net/manual/ru/closure.bindto.php
-    // $this в Slim это контейнер зависимостей
-    return $this->get('renderer')->render($response, 'users/show.phtml', $params);
+//$app->get('/users/{id}', function ($request, $response, $args) {
+//    $params = ['id' => $args['id'], 'nickname' => 'user-' . $args['id']];
+//    // Указанный путь считается относительно базовой директории для шаблонов, заданной на этапе конфигурации
+//    // $this доступен внутри анонимной функции благодаря https://php.net/manual/ru/closure.bindto.php
+//    // $this в Slim это контейнер зависимостей
+//    return $this->get('renderer')->render($response, 'users/show.phtml', $params);
+//});
+
+$app->get('/users/new', function($request, $response) {
+    $params = [
+        'user' => ['nickname' => '', 'email' => ''],
+        'errors' => []
+    ];
+    return $this->get('renderer')->render($response, 'users/new.phtml', $params);
+});
+
+$app->post('/users', function($request, $response) {
+    $dir = __DIR__ . '/../files';
+    $path = $dir . '/users_dp';
+    if (!is_dir($dir)) {
+        mkdir($dir, 0777, true);
+    }
+    $user = $request->getParsedBodyParam('user');
+    if (!file_exists($path)) {
+        $data = [];
+    } else {
+        $content = file_get_contents($path);
+        $data = json_decode($content, true) ?? [];
+    }
+
+    $data[] = $user;
+    $json = json_encode($data, JSON_PRETTY_PRINT);
+    file_put_contents($path, $json);
+
+    return $response->withRedirect('/users', 302);
 });
 
 $app->run();
