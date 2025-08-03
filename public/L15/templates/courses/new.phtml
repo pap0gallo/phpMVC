@@ -1,0 +1,29 @@
+<!-- BEGIN (write your solution here) -->
+<header><h1>New Course</h1></header>
+<hr>
+<form action="/courses" method="post">
+    <div>
+        <label>
+            Title:
+            <input type="text" name="course[title]" value="<?= htmlspecialchars($course['title']) ?>"/>
+        </label>
+        <?php if (isset($errors['title'])): ?>
+            <div><?= $errors['title'] ?></div>
+        <?php endif ?>
+    </div>
+    <div>
+        <label>
+            Paid:
+            <select name="course[paid]" id="paid">
+                <option value=""</option>
+                <option value="1" <?= (isset($course['paid']) && $course['paid'] === '1') ? 'selected' : '' ?>>Yes</option>
+                <option value="0" <?= (isset($course['paid']) && $course['paid'] === '0') ? 'selected' : '' ?>>No</option>
+            </select>
+        </label>
+        <?php if (isset($errors['paid'])): ?>
+            <div><?= $errors['paid'] ?></div>
+        <?php endif ?>
+    </div>
+    <input type="submit" value="Submit" />
+</form>
+<!-- END -->
