@@ -8,8 +8,6 @@ use DI\Container;
 
 $users = ['mike', 'mishel', 'adel', 'keks', 'kamila'];
 
-$dir =
-
 $container = new Container();
 $container->set('renderer', function () {
     // Параметром передается базовая директория, в которой будут храниться шаблоны
@@ -17,15 +15,19 @@ $container->set('renderer', function () {
 });
 $app = AppFactory::createFromContainer($container);
 $app->addErrorMiddleware(true, true, true);
+$container->set('router', function () use ($app) {
+    return $app->getRouteCollector()->getRouteParser();
+});
 
 $app->get('/', function ($request, $response) {
     $response->getBody()->write('Welcome to Slim!');
     return $response;
     // Благодаря пакету slim/http этот же код можно записать короче
     // return $response->write('Welcome to Slim!');
-});
+})->setName('home');
 
 $app->get('/users', function ($request, $response) {
+    $router = $this->get('router');
     $dir = __DIR__ . '/../files';
     $path = $dir . '/users_dp';
     $content = file_get_contents($path);
@@ -39,37 +41,33 @@ $app->get('/users', function ($request, $response) {
         $params['users'] = $users;
     }
     $params['term'] = $term;
+    $params['router'] = $router;
     return $this
         ->get('renderer')
         ->render($response, 'users/index.phtml', $params);
-});
+})->setName('users');
 
 //$app->post('/users', function ($request, $response) {
 //    return $response->withStatus(302);
 //});
 
-$app->get('/courses/{id}', function ($request, $response, array $args) {
-    $id = $args['id'];
-    return $response->write("Course id: {$id}");
-});
-
-//$app->get('/users/{id}', function ($request, $response, $args) {
-//    $params = ['id' => $args['id'], 'nickname' => 'user-' . $args['id']];
-//    // Указанный путь считается относительно базовой директории для шаблонов, заданной на этапе конфигурации
-//    // $this доступен внутри анонимной функции благодаря https://php.net/manual/ru/closure.bindto.php
-//    // $this в Slim это контейнер зависимостей
-//    return $this->get('renderer')->render($response, 'users/show.phtml', $params);
-//});
+//$app->get('/courses/{id}', function ($request, $response, array $args) {
+//    $id = $args['id'];
+//    return $response->write("Course id: {$id}");
+//})->setName('course.show');
 
 $app->get('/users/new', function($request, $response) {
+    $router = $this->get('router');
     $params = [
         'user' => ['nickname' => '', 'email' => ''],
-        'errors' => []
+        'errors' => [],
+        'router' => $router
     ];
     return $this->get('renderer')->render($response, 'users/new.phtml', $params);
-});
+})->setName('users.new');
 
 $app->post('/users', function($request, $response) {
+    $router = $this->get('router');
     $dir = __DIR__ . '/../files';
     $path = $dir . '/users_dp';
     if (!is_dir($dir)) {
@@ -83,11 +81,28 @@ $app->post('/users', function($request, $response) {
         $data = json_decode($content, true) ?? [];
     }
 
-    $data[] = $user;
+    $data[array_key_last($data) + 1 ?? 1] = $user;
     $json = json_encode($data, JSON_PRETTY_PRINT);
     file_put_contents($path, $json);
 
-    return $response->withRedirect('/users', 302);
-});
+    return $response->withRedirect($router->urlFor('users'), 302);
+})->setName('users.store');
+
+$app->get('/users/{id}', function ($request, $response, $args) {
+    $id = $args['id'];
+    $router = $this->get('router');
+    $dir = __DIR__ . '/../files';
+    $path = $dir . '/users_dp';
+    $content = file_get_contents($path);
+    $data = json_decode($content, true) ?? [];
+    if (!array_key_exists($id, $data)) {
+        return $response->withStatus(404);
+    }
+    $params = ['id' => $args['id'], 'user' => $data[$id], 'router' => $router];
+    // Указанный путь считается относительно базовой директории для шаблонов, заданной на этапе конфигурации
+    // $this доступен внутри анонимной функции благодаря https://php.net/manual/ru/closure.bindto.php
+    // $this в Slim это контейнер зависимостей
+    return $this->get('renderer')->render($response, 'users/show.phtml', $params);
+})->setName('users.id');
 
 $app->run();

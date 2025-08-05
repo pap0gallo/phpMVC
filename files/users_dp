@@ -1,22 +1,22 @@
-[
-    {
-        "nickname": "abc",
-        "email": "abc@mail.com"
+{
+    "1": {
+        "nickname": "Bibo",
+        "email": "bibo@mail.com"
     },
-    {
-        "nickname": "Nick",
-        "email": "nick@mail.com"
+    "2": {
+        "nickname": "Mthfckr",
+        "email": "mthrckr@mail.com"
     },
-    {
-        "nickname": "Mnb",
-        "email": "mnb@mail.com"
+    "3": {
+        "nickname": "John",
+        "email": "john@mail.com"
     },
-    {
-        "nickname": "Bob",
-        "email": "bob@mail.com"
+    "4": {
+        "nickname": "111",
+        "email": "123@mail.com"
     },
-    {
-        "nickname": "Dick",
-        "email": "dick@mail.com"
+    "5": {
+        "nickname": "Python",
+        "email": "python@mail.com"
     }
-]
+}

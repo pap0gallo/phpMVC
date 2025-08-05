@@ -1,4 +1,4 @@
-<form action="/users" method="get">
+<form action=<?= $router->urlFor('users') ?> method="get">
     <input type="search" name="term" value="<?= htmlspecialchars($term) ?>" />
     <input type="submit" value="Search" />
 </form>
@@ -15,4 +15,4 @@
         </tr>
     <?php endforeach ?>
 </table>
-<a href="/users/new">New User</a>
+<a href=<?= $router->urlFor('users.new') ?>>New User</a>

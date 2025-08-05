@@ -1,6 +1,6 @@
 <header><h1>New User</h1></header>
 <hr>
-<form action="/users" method="post">
+<form action=<?= $router->urlFor('users.store') ?> method="post">
     <div>
         <label>
             Nickname:
@@ -13,7 +13,5 @@
             <input type="text" name="user[email]" value="<?= htmlspecialchars($user['email']) ?>" required/>
         </label>
     </div>
-
-
     <input type="submit" value="Submit" />
 </form>

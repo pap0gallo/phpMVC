@@ -1,2 +1,12 @@
-<h1>id = <?= htmlspecialchars($id) ?></h1>
-<h1>nickname = user-<?= htmlspecialchars($id) ?></h1>
+<table>
+    <tr>
+        <td>
+            <?= $user['nickname'] ?>
+        </td>
+        <td>
+            <?= $user['email'] ?>
+        </td>
+    </tr>
+</table>
+
+<a href=<?= $router->urlFor('users') ?>>Back to users</a>
