@@ -18,5 +18,21 @@
     "5": {
         "nickname": "Python",
         "email": "python@mail.com"
+    },
+    "6": {
+        "nickname": "Robert",
+        "email": "rob123@mail.com"
+    },
+    "7": {
+        "nickname": "Carl",
+        "email": "carl@mail.com"
+    },
+    "8": {
+        "nickname": "siska",
+        "email": "siska@mail.com"
+    },
+    "9": {
+        "nickname": "Doggo",
+        "email": "doggo@gmail.com"
     }
 }

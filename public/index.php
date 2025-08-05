@@ -6,12 +6,17 @@ require __DIR__ . '/../vendor/autoload.php';
 use Slim\Factory\AppFactory;
 use DI\Container;
 
+session_start();
+
 $users = ['mike', 'mishel', 'adel', 'keks', 'kamila'];
 
 $container = new Container();
 $container->set('renderer', function () {
     // Параметром передается базовая директория, в которой будут храниться шаблоны
     return new \Slim\Views\PhpRenderer(__DIR__ . '/../templates');
+});
+$container->set('flash', function () {
+    return new \Slim\Flash\Messages();
 });
 $app = AppFactory::createFromContainer($container);
 $app->addErrorMiddleware(true, true, true);
@@ -33,6 +38,7 @@ $app->get('/users', function ($request, $response) {
     $content = file_get_contents($path);
     $users = json_decode($content, JSON_PRETTY_PRINT);
     $term = $request->getQueryParam('term') ?? '';
+    $messages = $this->get('flash')->getMessages();
     if ($term) {
         $params['users'] = collect($users)
             ->filter(fn($item) => str_contains($item['nickname'], $term))
@@ -42,6 +48,7 @@ $app->get('/users', function ($request, $response) {
     }
     $params['term'] = $term;
     $params['router'] = $router;
+    $params['flash'] = $messages;
     return $this
         ->get('renderer')
         ->render($response, 'users/index.phtml', $params);
@@ -84,7 +91,7 @@ $app->post('/users', function($request, $response) {
     $data[array_key_last($data) + 1 ?? 1] = $user;
     $json = json_encode($data, JSON_PRETTY_PRINT);
     file_put_contents($path, $json);
-
+    $this->get('flash')->addMessage('success', 'User was added successfully');
     return $response->withRedirect($router->urlFor('users'), 302);
 })->setName('users.store');
 
@@ -99,9 +106,6 @@ $app->get('/users/{id}', function ($request, $response, $args) {
         return $response->withStatus(404);
     }
     $params = ['id' => $args['id'], 'user' => $data[$id], 'router' => $router];
-    // Указанный путь считается относительно базовой директории для шаблонов, заданной на этапе конфигурации
-    // $this доступен внутри анонимной функции благодаря https://php.net/manual/ru/closure.bindto.php
-    // $this в Slim это контейнер зависимостей
     return $this->get('renderer')->render($response, 'users/show.phtml', $params);
 })->setName('users.id');
 

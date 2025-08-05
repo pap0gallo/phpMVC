@@ -1,7 +1,17 @@
+<h1>Users</h1>
 <form action=<?= $router->urlFor('users') ?> method="get">
     <input type="search" name="term" value="<?= htmlspecialchars($term) ?>" />
     <input type="submit" value="Search" />
 </form>
+<?php if (!empty($flash)) : ?>
+    <?php foreach ($flash as $type => $messages) : ?>
+        <?php foreach ($messages as $message) : ?>
+            <div style="color: green;" class="flash flash-<?= htmlspecialchars($type) ?>">
+                <?= htmlspecialchars($message) ?>
+            </div>
+        <?php endforeach ?>
+    <?php endforeach ?>
+<?php endif ?>
 <hr>
 <table>
     <?php foreach ($users as $user) : ?>
