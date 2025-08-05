@@ -1,0 +1,15 @@
+<form action="/courses" method="post">
+    <input type="submit" value="Create Course">
+</form>
+
+<!-- BEGIN (write your solution here) -->
+<?php if (!empty($flash)) : ?>
+    <?php foreach ($flash as $type => $messages) : ?>
+        <?php foreach ($messages as $message) : ?>
+            <div style="color: green;" class="flash flash-<?= htmlspecialchars($type) ?>">
+                <?= htmlspecialchars($message) ?>
+            </div>
+        <?php endforeach ?>
+    <?php endforeach ?>
+<?php endif ?>
+<!-- END -->
