@@ -1,0 +1,13 @@
+<!-- BEGIN (write your solution here) -->
+<table>
+    <?php foreach ($slice as $post): ?>
+        <tr>
+            <td>
+                <a href="/posts/<?= $post['id'] ?>"><?= $post['name'] ?></a>
+            </td>
+        </tr>
+    <?php endforeach ?>
+</table>
+<hr>
+<a href="/posts?page=<?= $page > 1 ? $page - 1 : 1 ?>">Prev</a> <a href="/posts?page=<?= $page + 1 ?>">Next</a>
+<!-- END -->
