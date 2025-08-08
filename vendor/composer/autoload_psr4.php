@@ -12,6 +12,7 @@ return array(
     'Symfony\\Polyfill\\Intl\\Grapheme\\' => array($vendorDir . '/symfony/polyfill-intl-grapheme'),
     'Symfony\\Polyfill\\Ctype\\' => array($vendorDir . '/symfony/polyfill-ctype'),
     'Symfony\\Component\\String\\' => array($vendorDir . '/symfony/string'),
+    'Src\\' => array($baseDir . '/src'),
     'Slim\\Views\\' => array($vendorDir . '/slim/php-view/src'),
     'Slim\\Psr7\\' => array($vendorDir . '/slim/psr7/src'),
     'Slim\\Http\\' => array($vendorDir . '/slim/http/src'),

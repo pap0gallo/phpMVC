@@ -1,10 +1,11 @@
 <?php
 
 // Подключение автозагрузки через composer
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/vendor/autoload.php';
 
 use Slim\Factory\AppFactory;
 use DI\Container;
+use Src\Validator;
 
 session_start();
 
@@ -13,7 +14,7 @@ $users = ['mike', 'mishel', 'adel', 'keks', 'kamila'];
 $container = new Container();
 $container->set('renderer', function () {
     // Параметром передается базовая директория, в которой будут храниться шаблоны
-    return new \Slim\Views\PhpRenderer(__DIR__ . '/../templates');
+    return new \Slim\Views\PhpRenderer(__DIR__ . '/templates');
 });
 $container->set('flash', function () {
     return new \Slim\Flash\Messages();
@@ -33,7 +34,7 @@ $app->get('/', function ($request, $response) {
 
 $app->get('/users', function ($request, $response) {
     $router = $this->get('router');
-    $dir = __DIR__ . '/../files';
+    $dir = __DIR__ . '/files';
     $path = $dir . '/users_dp';
     $content = file_get_contents($path);
     $users = json_decode($content, JSON_PRETTY_PRINT);
@@ -75,30 +76,36 @@ $app->get('/users/new', function($request, $response) {
 
 $app->post('/users', function($request, $response) {
     $router = $this->get('router');
-    $dir = __DIR__ . '/../files';
-    $path = $dir . '/users_dp';
-    if (!is_dir($dir)) {
-        mkdir($dir, 0777, true);
-    }
+    $validator = new Validator();
     $user = $request->getParsedBodyParam('user');
-    if (!file_exists($path)) {
-        $data = [];
-    } else {
-        $content = file_get_contents($path);
-        $data = json_decode($content, true) ?? [];
+    $errors = $validator->validate($user);
+    $dir = __DIR__ . '/files';
+    $path = $dir . '/users_dp';
+    if (count($errors) === 0) {
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+        if (!file_exists($path)) {
+            $data = [];
+        } else {
+            $content = file_get_contents($path);
+            $data = json_decode($content, true) ?? [];
+        }
+        $data[array_key_last($data) + 1 ?? 1] = $user;
+        $json = json_encode($data, JSON_PRETTY_PRINT);
+        file_put_contents($path, $json);
+        $this->get('flash')->addMessage('success', 'User was added successfully');
+        return $response->withRedirect($router->urlFor('users'), 302);
     }
-
-    $data[array_key_last($data) + 1 ?? 1] = $user;
-    $json = json_encode($data, JSON_PRETTY_PRINT);
-    file_put_contents($path, $json);
-    $this->get('flash')->addMessage('success', 'User was added successfully');
-    return $response->withRedirect($router->urlFor('users'), 302);
+    $params = ['user' => $user, 'errors' => $errors, 'router' => $router];
+    $response =  $response->withStatus(422);
+    return $this->get('renderer')->render($response, 'users/new.phtml', $params);
 })->setName('users.store');
 
 $app->get('/users/{id}', function ($request, $response, $args) {
     $id = $args['id'];
     $router = $this->get('router');
-    $dir = __DIR__ . '/../files';
+    $dir = __DIR__ . '/files';
     $path = $dir . '/users_dp';
     $content = file_get_contents($path);
     $data = json_decode($content, true) ?? [];

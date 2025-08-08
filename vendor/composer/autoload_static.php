@@ -30,6 +30,7 @@ class ComposerStaticInitd751713988987e9331980363e24189ce
             'Symfony\\Polyfill\\Intl\\Grapheme\\' => 31,
             'Symfony\\Polyfill\\Ctype\\' => 23,
             'Symfony\\Component\\String\\' => 25,
+            'Src\\' => 4,
             'Slim\\Views\\' => 11,
             'Slim\\Psr7\\' => 10,
             'Slim\\Http\\' => 10,
@@ -94,6 +95,10 @@ class ComposerStaticInitd751713988987e9331980363e24189ce
         'Symfony\\Component\\String\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/string',
+        ),
+        'Src\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/src',
         ),
         'Slim\\Views\\' => 
         array (

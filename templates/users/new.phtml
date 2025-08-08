@@ -6,12 +6,18 @@
             Nickname:
             <input type="text" name="user[nickname]" value="<?= htmlspecialchars($user['nickname']) ?>" required/>
         </label>
+        <?php if (isset($errors['nickname'])): ?>
+            <div><?= $errors['nickname'] ?></div>
+        <?php endif ?>
     </div>
     <div>
         <label>
             Email:
             <input type="text" name="user[email]" value="<?= htmlspecialchars($user['email']) ?>" required/>
         </label>
+        <?php if (isset($errors['email'])): ?>
+            <div><?= $errors['email'] ?></div>
+        <?php endif ?>
     </div>
     <input type="submit" value="Submit" />
 </form>
