@@ -17,7 +17,7 @@
     <?php foreach ($users as $user) : ?>
         <tr>
             <td>
-                <?= $user['nickname'] ?>
+                <a href=<?= $router->urlFor('users.edit', ['id' => $user['id']]) ?>><?= $user['nickname'] ?></a>
             </td>
             <td>
                 <?= $user['email'] ?>
@@ -25,4 +25,5 @@
         </tr>
     <?php endforeach ?>
 </table>
+<br>
 <a href=<?= $router->urlFor('users.new') ?>>New User</a>

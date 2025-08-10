@@ -4,6 +4,7 @@
 require __DIR__ . '/vendor/autoload.php';
 
 use Slim\Factory\AppFactory;
+use Slim\Middleware\MethodOverrideMiddleware;
 use DI\Container;
 use Src\Validator;
 
@@ -20,13 +21,15 @@ $container->set('flash', function () {
     return new \Slim\Flash\Messages();
 });
 $app = AppFactory::createFromContainer($container);
+$app->add(MethodOverrideMiddleware::class);
 $app->addErrorMiddleware(true, true, true);
 $container->set('router', function () use ($app) {
     return $app->getRouteCollector()->getRouteParser();
 });
 
+
 $app->get('/', function ($request, $response) {
-    $response->getBody()->write('Welcome to Slim!');
+    $response->getBody()->write('Welcome to Slim! <br> Go to <a href="http://localhost:8080/users">Users</a>');
     return $response;
     // Благодаря пакету slim/http этот же код можно записать короче
     // return $response->write('Welcome to Slim!');
@@ -37,7 +40,7 @@ $app->get('/users', function ($request, $response) {
     $dir = __DIR__ . '/files';
     $path = $dir . '/users_dp';
     $content = file_get_contents($path);
-    $users = json_decode($content, JSON_PRETTY_PRINT);
+    $users = json_decode($content, JSON_PRETTY_PRINT) ?? [];
     $term = $request->getQueryParam('term') ?? '';
     $messages = $this->get('flash')->getMessages();
     if ($term) {
@@ -67,7 +70,7 @@ $app->get('/users', function ($request, $response) {
 $app->get('/users/new', function($request, $response) {
     $router = $this->get('router');
     $params = [
-        'user' => ['nickname' => '', 'email' => ''],
+        'user' => ['id' => '', 'nickname' => '', 'email' => ''],
         'errors' => [],
         'router' => $router
     ];
@@ -91,7 +94,14 @@ $app->post('/users', function($request, $response) {
             $content = file_get_contents($path);
             $data = json_decode($content, true) ?? [];
         }
-        $data[array_key_last($data) + 1 ?? 1] = $user;
+        if (last($data)) {
+            $user['id'] = last($data)['id'] + 1;
+        } else {
+            $user['id'] = 1;
+        }
+        //$user['id'] = last($data)['id'] + 1 ?? 1;
+        //$data[array_key_last($data) + 1 ?? 1] = $user;
+        $data [] = $user;
         $json = json_encode($data, JSON_PRETTY_PRINT);
         file_put_contents($path, $json);
         $this->get('flash')->addMessage('success', 'User was added successfully');
@@ -108,12 +118,81 @@ $app->get('/users/{id}', function ($request, $response, $args) {
     $dir = __DIR__ . '/files';
     $path = $dir . '/users_dp';
     $content = file_get_contents($path);
-    $data = json_decode($content, true) ?? [];
-    if (!array_key_exists($id, $data)) {
+    $collection = collect(json_decode($content, true) ?? []);
+    $user = $collection->firstWhere('id', (string) $id);
+    if (empty($user)) {
         return $response->withStatus(404);
     }
-    $params = ['id' => $args['id'], 'user' => $data[$id], 'router' => $router];
+    $params = ['id' => $args['id'], 'user' => $user, 'router' => $router];
     return $this->get('renderer')->render($response, 'users/show.phtml', $params);
 })->setName('users.id');
+
+$app->get('/users/{id}/edit', function ($request, $response, $args) use ($container) {
+    $id = (string) $args['id'];
+
+    $dir = __DIR__ . '/files';
+    $path = $dir . '/users_dp';
+    $content = file_get_contents($path);
+    $collection = collect(json_decode($content, true) ?? []);
+
+    $user = $collection->firstWhere('id', $id);
+    if (!$user) {
+        return $response->withStatus(404);
+    }
+
+    return $container->get('renderer')->render($response, 'users/edit.phtml', [
+        'user'   => $user,
+        'errors' => [],
+        'flash'  => $container->get('flash')->getMessages(),
+        'router' => $container->get('router')
+    ]);
+})->setName('users.edit');
+
+$app->patch('/users/{id}', function ($request, $response, $args) use ($container) {
+    $idToUpdate = (string) $args['id'];
+    $newUserData = $request->getParsedBodyParam('user');
+
+    $validator = new Validator();
+    $errors = $validator->validate($newUserData);
+
+    $dir = __DIR__ . '/files';
+    $path = $dir . '/users_dp';
+    $content = file_get_contents($path);
+    $collection = collect(json_decode($content, true) ?? []);
+
+    // Проверка существования пользователя
+    $userExists = $collection->contains(fn($item) => (string)$item['id'] === $idToUpdate);
+    if (!$userExists) {
+        return $response->withStatus(404);
+    }
+
+    // Если ошибок нет — обновляем и сохраняем
+    if (empty($errors)) {
+        $updated = $collection->map(function ($item) use ($idToUpdate, $newUserData) {
+            if ((string)$item['id'] === $idToUpdate) {
+                return array_merge($item, [
+                    'nickname' => $newUserData['nickname'],
+                    'email' => $newUserData['email']
+                ]);
+            }
+            return $item;
+        });
+
+        file_put_contents($path, json_encode($updated->all(), JSON_PRETTY_PRINT));
+
+        $container->get('flash')->addMessage('success', 'User was edited successfully');
+        return $response->withRedirect(
+            $container->get('router')->urlFor('users.edit', ['id' => $idToUpdate])
+        );
+    }
+
+    // Если есть ошибки
+    $response = $response->withStatus(422);
+    return $container->get('renderer')->render($response, 'users/edit.phtml', [
+        'errors' => $errors,
+        'user' => $newUserData
+
+    ]);
+});
 
 $app->run();

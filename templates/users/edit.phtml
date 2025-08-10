@@ -1,7 +1,17 @@
-<h1>New User</h1>
-<hr>
-<form action=<?= $router->urlFor('users.store') ?> method="post">
+<h1>Edit User</h1>
+<?php if (!empty($flash)) : ?>
+    <?php foreach ($flash as $type => $messages) : ?>
+        <?php foreach ($messages as $message) : ?>
+            <div style="color: green;" class="flash flash-<?= htmlspecialchars($type) ?>">
+                <?= htmlspecialchars($message) ?>
+            </div>
+        <?php endforeach ?>
+    <?php endforeach ?>
+<?php endif ?>
+<form action="/users/<?= htmlspecialchars($user['id']) ?>" method="post">
+    <input type="hidden" name="_METHOD" value="PATCH">
     <div>
+        <input type="hidden" name="user[id]" value="<?= htmlspecialchars($user['id']) ?>" required/>
         <label>
             Nickname:
             <input type="text" name="user[nickname]" value="<?= htmlspecialchars($user['nickname']) ?>" required/>

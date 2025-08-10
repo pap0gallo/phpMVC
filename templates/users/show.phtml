@@ -7,6 +7,7 @@
             <?= $user['email'] ?>
         </td>
     </tr>
+    <a href=<?= $router->urlFor('users.edit', ['id' => $user['id']]) ?>>Edit</a>
 </table>
 
 <a href=<?= $router->urlFor('users') ?>>Back to users</a>
