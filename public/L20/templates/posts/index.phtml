@@ -1,0 +1,15 @@
+<?php if (count($flash) > 0): ?>
+        <?php foreach ($flash as $messages): ?>
+            <?php foreach ($messages as $message): ?>
+                <div style="color: green;"><?= $message ?></div>
+            <?php endforeach ?>
+        <?php endforeach ?>
+<?php endif ?>
+
+<a href="/posts/new">Новый пост</a>
+
+<?php foreach ($posts as $post): ?>
+    <div>
+        <?= htmlspecialchars($post['name']) ?>
+    </div>
+<?php endforeach ?>

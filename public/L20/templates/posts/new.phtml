@@ -1,0 +1,27 @@
+<a href="/posts">Посты</a>
+
+<!-- BEGIN (write your solution here) -->
+<h1>New Post</h1>
+<hr>
+<form action=<?= $router->urlFor('posts.store') ?> method="post">
+    <div>
+        <label>
+            Name:
+            <input type="text" name="post[name]" value="<?= htmlspecialchars($post['name']) ?>" />
+        </label>
+        <?php if (isset($errors['name'])): ?>
+            <div><?= $errors['name'] ?></div>
+        <?php endif ?>
+    </div>
+    <div>
+        <label>
+            Body:
+            <input type="text" name="post[body]" value="<?= htmlspecialchars($post['body']) ?>" />
+        </label>
+        <?php if (isset($errors['body'])): ?>
+            <div><?= $errors['body'] ?></div>
+        <?php endif ?>
+    </div>
+    <input type="submit" value="Submit" />
+</form>
+<!-- END -->
