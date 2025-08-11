@@ -1,6 +1,7 @@
 <div>
     <label>
         Имя *
+        <br>
         <input type="text" name="post[name]" value="<?= htmlspecialchars($postData['name'] ?? '') ?>">
     </label>
     <?php if (isset($errors['name'])): ?>
@@ -10,6 +11,7 @@
 <div>
     <label>
         Содержимое *
+        <br>
     </label>
     <textarea type="text" rows="20" cols="80" name="post[body]"><?= htmlspecialchars($postData['body'] ?? '') ?></textarea>
     <?php if (isset($errors['body'])): ?>

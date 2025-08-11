@@ -31,4 +31,8 @@
     </div>
     <input type="submit" value="Submit" />
 </form>
+<form action="/users/<?= $user['id'] ?>" method="post">
+    <input type="hidden" name="_METHOD" value="DELETE">
+    <input type="submit" value="Remove">
+</form>
 <a href=<?= $router->urlFor('users') ?>>Back to users</a>

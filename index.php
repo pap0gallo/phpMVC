@@ -10,7 +10,22 @@ use Src\Validator;
 
 session_start();
 
-$users = ['mike', 'mishel', 'adel', 'keks', 'kamila'];
+//$users = ['mike', 'mishel', 'adel', 'keks', 'kamila'];
+
+$storage = function () {
+    $dir = __DIR__ . '/files';
+    $path = $dir . '/users_dp';
+    if (!is_dir($dir)) {
+        mkdir($dir, 0777, true);
+    }
+    if (!file_exists($path)) {
+        $data = [];
+    } else {
+        $content = file_get_contents($path);
+        $data = json_decode($content, true) ?? [];
+    }
+    return ['data' => $data, 'path' => $path];
+};
 
 $container = new Container();
 $container->set('renderer', function () {
@@ -35,12 +50,10 @@ $app->get('/', function ($request, $response) {
     // return $response->write('Welcome to Slim!');
 })->setName('home');
 
-$app->get('/users', function ($request, $response) {
+$app->get('/users', function ($request, $response) use ($storage) {
+    $repo = $storage();
     $router = $this->get('router');
-    $dir = __DIR__ . '/files';
-    $path = $dir . '/users_dp';
-    $content = file_get_contents($path);
-    $users = json_decode($content, JSON_PRETTY_PRINT) ?? [];
+    $users = $repo['data'];
     $term = $request->getQueryParam('term') ?? '';
     $messages = $this->get('flash')->getMessages();
     if ($term) {
@@ -77,23 +90,15 @@ $app->get('/users/new', function($request, $response) {
     return $this->get('renderer')->render($response, 'users/new.phtml', $params);
 })->setName('users.new');
 
-$app->post('/users', function($request, $response) {
+$app->post('/users', function($request, $response) use ($storage) {
+    $repo = $storage();
     $router = $this->get('router');
     $validator = new Validator();
     $user = $request->getParsedBodyParam('user');
     $errors = $validator->validate($user);
-    $dir = __DIR__ . '/files';
-    $path = $dir . '/users_dp';
     if (count($errors) === 0) {
-        if (!is_dir($dir)) {
-            mkdir($dir, 0777, true);
-        }
-        if (!file_exists($path)) {
-            $data = [];
-        } else {
-            $content = file_get_contents($path);
-            $data = json_decode($content, true) ?? [];
-        }
+        $path = $repo['path'];
+        $data = $repo['data'];
         if (last($data)) {
             $user['id'] = last($data)['id'] + 1;
         } else {
@@ -112,13 +117,11 @@ $app->post('/users', function($request, $response) {
     return $this->get('renderer')->render($response, 'users/new.phtml', $params);
 })->setName('users.store');
 
-$app->get('/users/{id}', function ($request, $response, $args) {
+$app->get('/users/{id}', function ($request, $response, $args) use ($storage) {
+    $repo = $storage();
     $id = $args['id'];
     $router = $this->get('router');
-    $dir = __DIR__ . '/files';
-    $path = $dir . '/users_dp';
-    $content = file_get_contents($path);
-    $collection = collect(json_decode($content, true) ?? []);
+    $collection = collect($repo['data']);
     $user = $collection->firstWhere('id', (string) $id);
     if (empty($user)) {
         return $response->withStatus(404);
@@ -127,14 +130,10 @@ $app->get('/users/{id}', function ($request, $response, $args) {
     return $this->get('renderer')->render($response, 'users/show.phtml', $params);
 })->setName('users.id');
 
-$app->get('/users/{id}/edit', function ($request, $response, $args) use ($container) {
+$app->get('/users/{id}/edit', function ($request, $response, $args) use ($container, $storage) {
+    $repo = $storage();
     $id = (string) $args['id'];
-
-    $dir = __DIR__ . '/files';
-    $path = $dir . '/users_dp';
-    $content = file_get_contents($path);
-    $collection = collect(json_decode($content, true) ?? []);
-
+    $collection = collect($repo['data']);
     $user = $collection->firstWhere('id', $id);
     if (!$user) {
         return $response->withStatus(404);
@@ -148,17 +147,14 @@ $app->get('/users/{id}/edit', function ($request, $response, $args) use ($contai
     ]);
 })->setName('users.edit');
 
-$app->patch('/users/{id}', function ($request, $response, $args) use ($container) {
+$app->patch('/users/{id}', function ($request, $response, $args) use ($container, $storage) {
+    $repo = $storage();
+    $path = $repo['path'];
     $idToUpdate = (string) $args['id'];
     $newUserData = $request->getParsedBodyParam('user');
-
     $validator = new Validator();
     $errors = $validator->validate($newUserData);
-
-    $dir = __DIR__ . '/files';
-    $path = $dir . '/users_dp';
-    $content = file_get_contents($path);
-    $collection = collect(json_decode($content, true) ?? []);
+    $collection = collect($repo['data']);
 
     // Проверка существования пользователя
     $userExists = $collection->contains(fn($item) => (string)$item['id'] === $idToUpdate);
@@ -193,6 +189,25 @@ $app->patch('/users/{id}', function ($request, $response, $args) use ($container
         'user' => $newUserData
 
     ]);
+});
+
+$app->delete('/users/{id}', function ($request, $response, $args) use ($container, $storage) {
+    $repo = $storage();
+    $id = (string) $args['id'];
+    $path = $repo['path'];
+    $collection = collect($repo['data']);
+    $user = $collection->firstWhere('id', $id);
+    if (!$user) {
+        return $response->withStatus(404);
+    }
+    $updated = $collection->reject(function ($item) use ($id) {
+        return (string) $item['id'] === $id;
+    })->all();
+    file_put_contents($path, json_encode($updated, JSON_PRETTY_PRINT));
+    $container->get('flash')->addMessage('success', 'User was deleted successfully');
+    return $response->withRedirect(
+        $container->get('router')->urlFor('users.store')
+    );
 });
 
 $app->run();
