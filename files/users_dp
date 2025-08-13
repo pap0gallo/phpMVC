@@ -3,5 +3,15 @@
         "nickname": "Bobby",
         "email": "oldbob@gmail.com",
         "id": 1
+    },
+    {
+        "nickname": "Taddy",
+        "email": "tad@mail.com",
+        "id": 2
+    },
+    {
+        "nickname": "Chicho",
+        "email": "burumbumbeum@mail.com",
+        "id": 3
     }
 ]
