@@ -1,0 +1,13 @@
+<h1>Login</h1>
+<form action=<?= $router->urlFor('login') ?> method="post">
+    <div>
+        <label>
+            Username:
+            <input type="text" name="user[email]" value="<?= htmlspecialchars($user['email']) ?>" required/>
+        </label>
+        <?php if (isset($errors['email'])): ?>
+            <div style="color: red;"><?= $errors['email'] ?></div>
+        <?php endif ?>
+    </div>
+    <input type="submit" value="Login" />
+</form>

@@ -1,4 +1,8 @@
 <h1>Users</h1>
+<form action="/" method="post">
+    <input type="hidden" name="_METHOD" value="DELETE">
+    <input type="submit" value="Logout">
+</form>
 <form action=<?= $router->urlFor('users') ?> method="get">
     <input type="search" name="term" value="<?= htmlspecialchars($term) ?>" />
     <input type="submit" value="Search" />

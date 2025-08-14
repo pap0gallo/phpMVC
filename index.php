@@ -10,6 +10,7 @@ use Src\Validator;
 
 session_start();
 
+
 //$users = ['mike', 'mishel', 'adel', 'keks', 'kamila'];
 
 //$storage = function () {
@@ -44,16 +45,45 @@ $container->set('router', function () use ($app) {
 });
 
 
-$app->get('/', function ($request, $response) {
-    $response->getBody()->write('Welcome to Slim! <br> Go to <a href="http://localhost:8080/users">Users</a>');
-    return $response;
-    // Благодаря пакету slim/http этот же код можно записать короче
-    // return $response->write('Welcome to Slim!');
-})->setName('home');
+$app->get('/', function ($request, $response) use ($container) {
+    $params['router'] = $container->get('router');
+    $user['email'] = '';
+    $params['user'] = $user;
+    return $container
+        ->get('renderer')
+        ->render($response, 'users/login.phtml', $params);
+})->setName('login');
+
+$app->post('/', function ($request, $response) use ($container) {
+   $user = $request->getParsedBodyParam('user') ?? '';
+   $email = $user['email'];
+   $usersUrl = $container->get('router')->urlFor('users');
+
+   if ($email !== '' && str_contains($email, '@')) {
+       $_SESSION['user'][] = $user['email'];
+       return $response->withRedirect($usersUrl);
+   }
+
+   $errors['email'] = 'Username must be valid email';
+   $params['errors'] = $errors;
+   $params['router'] = $container->get('router');
+   $params['user'] = $user;
+    return $container
+        ->get('renderer')
+        ->render($response, 'users/login.phtml', $params);
+})->setName('login');
+
+$app->delete('/', function ($request, $response) use ($container) {
+    $loginUrl = $container->get('router')->urlFor('login');
+    setcookie('user', '', time() - 3600, '/');
+    $_SESSION = [];
+    session_destroy();
+    return $response->withRedirect($loginUrl);
+});
 
 $app->get('/users', function ($request, $response) {
     $router = $this->get('router');
-    $data = json_decode($request->getCookieParam('users', json_encode([])), true);
+    $data = json_decode($_SESSION['users'] ?? json_encode([]), true);
     $term = $request->getQueryParam('term') ?? '';
     $messages = $this->get('flash')->getMessages();
     if ($term) {
@@ -71,18 +101,17 @@ $app->get('/users', function ($request, $response) {
         ->render($response, 'users/index.phtml', $params);
 })->setName('users');
 
-$app->get('/users/new', function($request, $response) {
-    $router = $this->get('router');
+$app->get('/users/new', function($request, $response) use ($container) {
     $params = [
         'user' => ['id' => '', 'nickname' => '', 'email' => ''],
         'errors' => [],
-        'router' => $router
+        'router' => $container->get('router')
     ];
-    return $this->get('renderer')->render($response, 'users/new.phtml', $params);
+    return $container->get('renderer')->render($response, 'users/new.phtml', $params);
 })->setName('users.new');
 
-$app->post('/users', function($request, $response) {
-    $data = json_decode($request->getCookieParam('users', json_encode([])), true);
+$app->post('/users', function($request, $response) use ($container) {
+    $data = json_decode($_SESSION['users'] ?? json_encode([]), true);
     $router = $this->get('router');
     $validator = new Validator();
     $user = $request->getParsedBodyParam('user');
@@ -95,9 +124,9 @@ $app->post('/users', function($request, $response) {
         }
         $data [] = $user;
         $json = json_encode($data);
-        $this->get('flash')->addMessage('success', 'User was added successfully');
+        $_SESSION['users'] = $json;
+        $container->get('flash')->addMessage('success', 'User was added successfully');
         return $response
-            ->withHeader('Set-Cookie', 'users=' . rawurlencode($json) . '; Path=/; HttpOnly')
             ->withRedirect($router->urlFor('users'), 302);
     }
     $params = ['user' => $user, 'errors' => $errors, 'router' => $router];
@@ -106,7 +135,7 @@ $app->post('/users', function($request, $response) {
 })->setName('users.store');
 
 $app->get('/users/{id}', function ($request, $response, $args) {
-    $data = json_decode($request->getCookieParam('users', json_encode([])), true);
+    $data = json_decode($_SESSION['users'] ?? json_encode([]), true);
     $id = $args['id'];
     $router = $this->get('router');
     $collection = collect($data);
@@ -119,7 +148,7 @@ $app->get('/users/{id}', function ($request, $response, $args) {
 })->setName('users.id');
 
 $app->get('/users/{id}/edit', function ($request, $response, $args) use ($container) {
-    $data = json_decode($request->getCookieParam('users', json_encode([])), true);
+    $data = json_decode($_SESSION['users'] ?? json_encode([]), true);
     $id = (string) $args['id'];
     $collection = collect($data);
     $user = $collection->firstWhere('id', $id);
@@ -136,7 +165,7 @@ $app->get('/users/{id}/edit', function ($request, $response, $args) use ($contai
 })->setName('users.edit');
 
 $app->patch('/users/{id}', function ($request, $response, $args) use ($container) {
-    $data = json_decode($request->getCookieParam('users', json_encode([])), true);
+    $data = json_decode($_SESSION['users'] ?? json_encode([]), true);
     $idToUpdate = (string) $args['id'];
     $newUserData = $request->getParsedBodyParam('user');
     $validator = new Validator();
@@ -161,9 +190,9 @@ $app->patch('/users/{id}', function ($request, $response, $args) use ($container
             return $item;
         });
         $json = json_encode($updated);
+        $_SESSION['users'] = $json;
         $container->get('flash')->addMessage('success', 'User was edited successfully');
         return $response
-            ->withHeader('Set-Cookie', 'users=' . rawurlencode($json) . '; Path=/; HttpOnly')
             ->withRedirect(
             $container->get('router')->urlFor('users.edit', ['id' => $idToUpdate])
         );
@@ -179,7 +208,7 @@ $app->patch('/users/{id}', function ($request, $response, $args) use ($container
 });
 
 $app->delete('/users/{id}', function ($request, $response, $args) use ($container) {
-    $data = json_decode($request->getCookieParam('users', json_encode([])), true);
+    $data = json_decode($_SESSION['users'] ?? json_encode([]), true);
     $id = (string) $args['id'];
     $collection = collect($data);
     $user = $collection->firstWhere('id', $id);
@@ -190,6 +219,7 @@ $app->delete('/users/{id}', function ($request, $response, $args) use ($containe
         return (string) $item['id'] === $id;
     })->all();
     $json = json_encode($updated);
+    $_SESSION['users'] = $json;
     $container->get('flash')->addMessage('success', 'User was deleted successfully');
     return $response
         ->withHeader('Set-Cookie', 'users=' . rawurlencode($json) . '; Path=/; HttpOnly')
