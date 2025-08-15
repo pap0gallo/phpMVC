@@ -1,0 +1,37 @@
+<?php if (count($flash) > 0): ?>
+    <ul>
+        <?php foreach ($flash as $messages): ?>
+            <?php foreach ($messages as $message): ?>
+                <li><?= $message ?></li>
+            <?php endforeach ?>
+        <?php endforeach ?>
+    </ul>
+<?php endif ?>
+
+<!-- BEGIN (write your solution here) -->
+<?php if (!$user['auth']): ?>
+<form action='/session' method="post">
+    <div>
+        <label>
+            Username:
+            <input type="text" name="user[name]" value="<?= htmlspecialchars($user['name']) ?>" required/>
+        </label>
+    </div>
+    <div>
+        <label>
+            Password:
+            <input name="user[password]" type="password" value="" required/>
+        </label>
+    </div>
+    <input type="submit" value="Sign In" />
+</form>
+<?php endif ?>
+<?php if ($user['auth']): ?>
+<br>
+<h1><?= $user['name'] ?></h1>
+<form action="/session" method="post">
+    <input type="hidden" name="_METHOD" value="DELETE">
+    <input type="submit" value="Sign Out">
+</form>
+<?php endif ?>
+<!-- END -->
