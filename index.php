@@ -7,6 +7,9 @@ use Slim\Factory\AppFactory;
 use Slim\Middleware\MethodOverrideMiddleware;
 use DI\Container;
 use Src\Validator;
+use Src\Car;
+use Src\CarRepository;
+use Src\CarValidator;
 
 session_start();
 
@@ -30,6 +33,16 @@ session_start();
 
 
 $container = new Container();
+$container->set(\PDO::class, function () {
+    $conn = new \PDO('sqlite:database.sqlite');
+    $conn->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
+    return $conn;
+});
+
+$initFilePath = implode('/', [dirname(__DIR__), 'init.sql']);
+$initSql = file_get_contents($initFilePath);
+$container->get(\PDO::class)->exec($initSql);
+
 $container->set('renderer', function () {
     // Параметром передается базовая директория, в которой будут храниться шаблоны
     return new \Slim\Views\PhpRenderer(__DIR__ . '/templates');
@@ -226,6 +239,94 @@ $app->delete('/users/{id}', function ($request, $response, $args) use ($containe
         ->withRedirect(
         $container->get('router')->urlFor('users.store')
     );
+});
+
+$app->get('/cars', function ($request, $response) use ($container) {
+    $carRepository = $container->get(CarRepository::class);
+    $cars = $carRepository->getEntities();
+
+    $messages = $container->get('flash');
+
+    $params = [
+        'cars' => $cars,
+        'flash' => $messages
+    ];
+
+    return $container
+        ->get('renderer')
+        ->render($response, 'cars/index.phtml', $params);
+})->setName('cars.index');
+
+$app->get('/cars/{id}', function ($request, $response, $arg) use ($container) {
+    $id = $arg['id'];
+
+    $carsRepository = $container->get(CarRepository::class);
+    $car = $carsRepository->find($id);
+
+    if (is_null($car)) {
+        return $response
+            ->write('Page not found')
+            ->withStatus(404);
+    }
+
+    $messages = $container->get('flash');
+
+    $params = [
+        'car' => $car,
+        'flash' => $messages
+    ];
+
+    return $container
+        ->get('renderer')
+        ->render($response, 'cars/show.phtml', $params);
+})->setName('cars.show');
+
+$app->get('/cars/new', function ($request, $response) use ($container) {
+    $params = [
+        'car' => new Car(),
+        'errors' => []
+    ];
+
+    return $container
+        ->get('renderer')
+        ->render($response, 'car/new.phtml', $params);
+})->setName('cars.create');
+
+$app->post('/cars', function ($request, $response) use ($container) {
+    $carRepository = $container->get(new CarRepository::class);
+    $carData = $request->getBodyParam('car');
+
+    $validator = new CarValidator();
+    $errors = $validator->validate($carData);
+
+    if (count($errors) === 0) {
+        $car = new Car([$carData['make'], $carData['model']]);
+        $carRepository->save($car);
+        $container->get('flash')->addMessage('success', 'Car was added successfully');
+        return $response->withRedirect($container->get('router')->urlFor('cars.index'));
+    }
+    $params = [
+        'car' => $carData,
+        'errors' => $errors
+    ];
+    return $container
+        ->get('renderer')
+        ->render($response->withStatus(422), 'cars/new.phtml', $params);
+})->setName('cars.store');
+
+$app->delete('/cars/{id}', function ($request, $response, $args) use  ($container) {
+    $id = $args['id'];
+    $carRepository = $container->get(CarRepository::class);
+    $car = $carRepository->find($id);
+
+    if (!is_null($car)) {
+        $carRepository->delete($id);
+
+        $container->get('flash')->addMessage('success', 'Car was deleted successfully');
+        return $response->withRedirect($container->get('router')->urlFor('cars.index'));
+    }
+    return $response
+        ->withStatus(404);
 });
 
 $app->run();
