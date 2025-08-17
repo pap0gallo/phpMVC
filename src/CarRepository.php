@@ -48,8 +48,9 @@ class CarRepository
         }
     }
 
-    public function delete(int $id): void
+    public function delete(Car $car): void
     {
+        $id = $car->getId();
         $sql = "DELETE FROM cars WHERE id= :id";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([$id]);

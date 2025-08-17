@@ -320,7 +320,7 @@ $app->delete('/cars/{id}', function ($request, $response, $args) use  ($containe
     $car = $carRepository->find($id);
 
     if (!is_null($car)) {
-        $carRepository->delete($id);
+        $carRepository->delete($car);
 
         $container->get('flash')->addMessage('success', 'Car was deleted successfully');
         return $response->withRedirect($container->get('router')->urlFor('cars.index'));

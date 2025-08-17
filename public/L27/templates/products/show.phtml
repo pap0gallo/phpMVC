@@ -1,0 +1,12 @@
+<div>
+    <a href="/products/<?= $product->getId() ?>/edit">Редактировать</a>
+    <form action="/products/<?= $product->getId() ?>" method="post">
+        <input type="hidden" name="_METHOD" value="DELETE">
+        <input type="submit" value="Delete">
+    </form>
+
+
+    <p><strong>ID: </strong> <?= $product->getId() ?></p>
+    <p><strong>Название: </strong> <?= htmlspecialchars($product->getTitle())?></p>
+    <p><strong>Цена: </strong><?= htmlspecialchars($product->getPrice())?></p>
+</div>

@@ -1,0 +1,30 @@
+<?php if (count($flash) > 0) : ?>
+    <ul>
+        <?php foreach ($flash as $messages) : ?>
+            <?php foreach ($messages as $message) : ?>
+                <li><?= $message ?></li>
+            <?php endforeach ?>
+        <?php endforeach ?>
+    </ul>
+<?php endif ?>
+
+<h1>Список товаров</h1>
+
+<a href="/products/new">Новый товар</a>
+
+<? if (!empty($products)): ?>
+    <table border="0">
+        <tr>
+            <th>Название</th>
+            <th>Цена</th>
+        </tr>
+        <?php foreach ($products as $product): ?>
+            <tr>
+                <td>
+                    <a href="/products/<?= $product->getId() ?>"><?= htmlspecialchars($product->getTitle()) ?></a>
+                </td>
+                <td><?php echo htmlspecialchars($product->getPrice()); ?> руб.</td>
+            </tr>
+        <?php endforeach; ?>
+    </table>
+<? endif; ?>

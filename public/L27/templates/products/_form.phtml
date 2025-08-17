@@ -1,0 +1,18 @@
+<div>
+    <label>
+        Название *
+        <input type="text" name="product[title]" value="<?= htmlspecialchars($product->getTitle() ?? '') ?>">
+    </label>
+    <?php if (isset($errors['title'])): ?>
+        <div><?= $errors['title'] ?></div>
+    <?php endif ?>
+</div>
+<div>
+    <label>
+        Цена *
+    </label>
+    <input type="text" name="product[price]" value ="<?= htmlspecialchars($product->getPrice() ?? '') ?>">
+    <?php if (isset($errors['price'])): ?>
+        <div><?= $errors['price'] ?></div>
+    <?php endif ?>
+</div>
