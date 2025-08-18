@@ -10,10 +10,10 @@ class Car
 
     public static function fromArray(array $carData): Car
     {
-        [$make, $model] = $carData;
+        ['make' => $make, 'model' => $model] = $carData;
         $car = new Car();
-        $car->setMake($make);
-        $car->setModel($model);
+        $car->setMake((string) $make);
+        $car->setModel((string) $model);
         return $car;
     }
 

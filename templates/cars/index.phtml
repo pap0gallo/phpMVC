@@ -1,0 +1,30 @@
+<?php if (isset($flash)) : ?>
+    <ul>
+        <?php foreach ($flash as $messages) : ?>
+            <?php foreach ($messages as $message) : ?>
+                <li><?= $message ?></li>
+            <?php endforeach ?>
+        <?php endforeach ?>
+    </ul>
+<?php endif ?>
+
+<h1>Список машин</h1>
+
+<a href="/cars/new">Новая машина</a>
+
+<? if (!empty($cars)): ?>
+    <table border="0">
+        <tr>
+            <th>Производитель</th>
+            <th>Модель</th>
+        </tr>
+        <?php foreach ($cars as $car): ?>
+            <tr>
+                <td>
+                    <a href="/cars/<?= $car->getId() ?>"><?= htmlspecialchars($car->getMake()) ?></a>
+                </td>
+                <td><?php echo htmlspecialchars($car->getModel()); ?></td>
+            </tr>
+        <?php endforeach; ?>
+    </table>
+<? endif; ?>

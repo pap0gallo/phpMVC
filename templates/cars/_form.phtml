@@ -1,0 +1,18 @@
+<div>
+    <label>
+        Производитель *
+        <input type="text" name="car[make]" value="<?= htmlspecialchars($car->getMake() ?? '') ?>">
+    </label>
+    <?php if (isset($errors['make'])): ?>
+        <div><?= $errors['make'] ?></div>
+    <?php endif ?>
+</div>
+<div>
+    <label>
+        Модель *
+    </label>
+    <input type="text" name="car[model]" value ="<?= htmlspecialchars($car->getModel() ?? '') ?>">
+    <?php if (isset($errors['model'])): ?>
+        <div><?= $errors['model'] ?></div>
+    <?php endif ?>
+</div>

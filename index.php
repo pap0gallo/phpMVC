@@ -39,7 +39,7 @@ $container->set(\PDO::class, function () {
     return $conn;
 });
 
-$initFilePath = implode('/', [dirname(__DIR__), 'init.sql']);
+$initFilePath = implode('/', [dirname(__DIR__), 'phpMVC/init.sql']);
 $initSql = file_get_contents($initFilePath);
 $container->get(\PDO::class)->exec($initSql);
 
@@ -257,6 +257,17 @@ $app->get('/cars', function ($request, $response) use ($container) {
         ->render($response, 'cars/index.phtml', $params);
 })->setName('cars.index');
 
+$app->get('/cars/new', function ($request, $response) use ($container) {
+    $params = [
+        'car' => new Car(),
+        'errors' => []
+    ];
+
+    return $container
+        ->get('renderer')
+        ->render($response, 'cars/new.phtml', $params);
+})->setName('cars.create');
+
 $app->get('/cars/{id}', function ($request, $response, $arg) use ($container) {
     $id = $arg['id'];
 
@@ -281,26 +292,64 @@ $app->get('/cars/{id}', function ($request, $response, $arg) use ($container) {
         ->render($response, 'cars/show.phtml', $params);
 })->setName('cars.show');
 
-$app->get('/cars/new', function ($request, $response) use ($container) {
+$app->get('/cars/{id}/edit', function ($request, $response, $args) use ($container) {
+    $id = $args['id'];
+
+    $carRepository = $container->get(CarRepository::class);
+    $car = $carRepository->find($id);
+
+    if (!$car) {
+        throw new Slim\Exception\HttpNotFoundException($request);
+    }
+
     $params = [
-        'car' => new Car(),
+        'car' => $car,
         'errors' => []
     ];
 
-    return $container
-        ->get('renderer')
-        ->render($response, 'car/new.phtml', $params);
-})->setName('cars.create');
+    return $this->get('renderer')->render($response, 'cars/edit.phtml', $params);
+});
 
-$app->post('/cars', function ($request, $response) use ($container) {
-    $carRepository = $container->get(new CarRepository::class);
-    $carData = $request->getBodyParam('car');
+$app->put('/cars/{id}', function ($request, $response, $args) use ($container) {
+    $id = (int) $args['id'];
+
+    $carRepository = $container->get(CarRepository::class);
+    $car = $carRepository->find($id);
+
+    if (!$car) {
+        throw new Slim\Exception\HttpNotFoundException($request);
+    }
+
+    $carData = $request->getParsedBodyParam('car');
 
     $validator = new CarValidator();
     $errors = $validator->validate($carData);
 
     if (count($errors) === 0) {
-        $car = new Car([$carData['make'], $carData['model']]);
+        $car = Car::fromArray(['make' => $carData['make'], 'model' => $carData['model']]);
+        $car->setId($id);
+        $carRepository->save($car);
+        $container->get('flash')->addMessage('success', 'Car was updated successfully');
+        return $response->withRedirect($container->get('router')->urlFor('cars.index'));
+    }
+    $params = [
+        'car' => $carData,
+        'errors' => $errors
+    ];
+    return $container
+        ->get('renderer')
+        ->render($response->withStatus(422), 'cars/edit.phtml', $params);
+})->setName('cars.store');
+
+$app->post('/cars', function ($request, $response) use ($container) {
+    $carRepository = $container->get(CarRepository::class);
+    $carData = $request->getParsedBodyParam('car');
+
+    $validator = new CarValidator();
+    $errors = $validator->validate($carData);
+
+    if (count($errors) === 0) {
+        $car = Car::fromArray(['make' => $carData['make'], 'model' => $carData['model']]);
         $carRepository->save($car);
         $container->get('flash')->addMessage('success', 'Car was added successfully');
         return $response->withRedirect($container->get('router')->urlFor('cars.index'));

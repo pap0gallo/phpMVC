@@ -1,0 +1,12 @@
+<div>
+    <a href="/cars/<?= $car->getId() ?>/edit">Редактировать</a>
+    <form action="/cars/<?= $car->getId() ?>" method="post">
+        <input type="hidden" name="_METHOD" value="DELETE">
+        <input type="submit" value="Delete">
+    </form>
+
+
+    <p><strong>ID: </strong> <?= $car->getId() ?></p>
+    <p><strong>Производитель: </strong> <?= htmlspecialchars($car->getMake())?></p>
+    <p><strong>Модель: </strong><?= htmlspecialchars($car->getModel())?></p>
+</div>

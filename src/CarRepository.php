@@ -18,7 +18,7 @@ class CarRepository
         $stmt = $this->conn->query($sql);
 
         while ($row = $stmt->fetch()) {
-            $car = Car::fromArray([$row['make'], $row['model']]);
+            $car = Car::fromArray(['make' => $row['make'], 'model' => $row['model']]);
             $car->setId($row['id']);
             $cars[] = $car;
         }
@@ -32,7 +32,7 @@ class CarRepository
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([$id]);
         if ($row = $stmt->fetch())  {
-            $car = Car::fromArray([$row['make'], $row['model']]);
+            $car = Car::fromArray(['make' => $row['make'],'model' => $row['model']]);
             $car->setId($row['id']);
             return $car;
         }
