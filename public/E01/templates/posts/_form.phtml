@@ -1,0 +1,22 @@
+<div>
+    <label>Автор</label>
+    <br>
+    <?php if (isset($errors['author'])): ?><div><?= $errors['author'] ?></div><?php endif ?>
+    <input type="text" name="post[author]" value="<?= htmlspecialchars($post->author) ?>" disabled>
+</div>
+<br>
+<div>
+    <label>Заголовок *</label>
+    <?php if (isset($errors['title'])): ?><div><?= $errors['title'] ?></div><?php endif ?>
+    <br>
+    <input type="text" name="post[title]" value="<?= htmlspecialchars($post->title ?? '') ?>">
+</div>
+<br>
+<div>
+    <label>Содержимое *</label>
+    <br>
+    <?php if (isset($errors['body'])): ?><div><?= $errors['body'] ?></div><?php endif ?>
+
+    <textarea name="post[body]" id="post_body"><?= htmlspecialchars($post->body ?? '') ?></textarea>
+</div>
+<br>

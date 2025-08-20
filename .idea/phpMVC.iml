@@ -35,6 +35,9 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/polyfill-mbstring" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/string" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/slim/flash" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/tuupola/callable-handler" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/tuupola/http-factory" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/tuupola/slim-basic-auth" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

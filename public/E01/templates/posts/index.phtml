@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Посты</title>
+</head>
+<body>
+<header>
+    <h1>Мой блог - Посты</h1>
+</header>
+<nav>
+    <ul>
+        <li>
+            <a href="/">На главную</a>
+        </li>
+    </ul>
+</nav>
+<?php if (count($flash) > 0) : ?>
+    <?php foreach ($flash as $messages) : ?>
+        <?php foreach ($messages as $message) : ?>
+            <p><?= $message ?></p>
+        <?php endforeach ?>
+    <?php endforeach ?>
+<?php endif ?>
+
+<a href="/posts/new">Создать новый пост</a>
+
+<?php if (!empty($posts)): ?>
+    <?php foreach ($posts as $post): ?>
+        <article>
+            <h2>
+                <?= htmlspecialchars($post->title) ?>
+            </h2>
+            <small>Автор: <?= htmlspecialchars($post->author) ?></small>
+            <?= implode('\n\n', array_map(fn($p) => '<p>' . htmlspecialchars($p) . '</p>', explode('\n', $post->body)));  ?>
+        </article>
+
+    <?php endforeach; ?>
+<?php else: ?>
+    <h2>No Posts.</h2>
+<?php endif; ?>
+</body>
+</html>
